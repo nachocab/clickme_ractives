@@ -1,13 +1,8 @@
-#' Translate the data object to the format expected by template.Rmd
-#'
-#' It returns the translated data object.
-#'
-#' @param data input data object
-#' @param opts options of current ractive
-translate <- function(data, opts) {
+get_data_as_json <- function(opts) {
     library(df2json)
-    data <- as.data.frame(data, stringsAsFactors=FALSE)
-    data <- df2json(data)
-    data
+    data <- as.data.frame(opts$data, stringsAsFactors = FALSE)
+    json_data <- df2json(data)
+
+    json_data
 }
 

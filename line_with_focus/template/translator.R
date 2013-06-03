@@ -1,4 +1,4 @@
-prepare_data <- function(data){
+get_data_as_nested_structure <- function(data){
     if (!is.factor(data$line)) data$line <- as.factor(data$line)
 
     data <- lapply(levels(data$line), function(line){
@@ -12,17 +12,12 @@ prepare_data <- function(data){
     data
 }
 
-#' Translate the data object to the format expected by template.Rmd
-#'
-#' It returns the translated data object.
-#'
-#' @param data input data object
-#' @param opts options of current ractive
-translate <- function(data, opts) {
+get_data_as_json <- function(opts) {
     library(rjson)
-    data <- as.data.frame(data, stringsAsFactors=FALSE)
-    data <- prepare_data(data)
-    data <- toJSON(data)
-    data
+    data <- as.data.frame(opts$data, stringsAsFactors = FALSE)
+    data <- get_data_as_nested_structure(data)
+    json_data <- toJSON(data)
+
+    json_data
 }
 

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+    <title>Zoomable scatterplot</title>
+
+    <link href="zoomable_scatterplot/external/bootstrap-tooltip.css" rel="stylesheet">
+<script src="zoomable_scatterplot/external/d3.min.js"></script>
+<script src="zoomable_scatterplot/external/d3_aux.js"></script>
+<script src="zoomable_scatterplot/external/jquery.min.js"></script>
+<script src="zoomable_scatterplot/external/bootstrap-tooltip.v2_3.js"></script>
+
+  </head>
+
+  <body>
+    <script type="text/javascript">
+    (function() {
+      var dec_format;
+    
+      dec_format = d3.format(".2f");
+    
+      d3.json("zoomable_scatterplot/data/data.json", function(data) {
+        var change, circles, names, plot, radius, semantic_zoom, show_names_button, svg, transform, update;
+        plot = append_plot({
+          width: 800,
+          height: 500,
+          margin: {
+            "top": 10,
+            "left": 30,
+            "bottom": 30,
+            "right": 10
+          }
+        });
+        plot.scales.x.domain([
+          d3.min(data, function(d) {
+            return d.x;
+          }), d3.max(data, function(d) {
+            return d.x;
+          })
+        ]);
+        plot.scales.x = add_padding(plot.scales.x);
+        plot.scales.y.domain([
+          d3.min(data, function(d) {
+            return d.y;
+          }), d3.max(data, function(d) {
+            return d.y;
+          })
+        ]);
+        plot.scales.y = add_padding(plot.scales.y);
+        plot = draw_axes(plot);
+        radius = 5;
+        svg = plot.append("svg:g").call(d3.behavior.zoom().x(plot.scales.x).y(plot.scales.y).scaleExtent([1, Infinity]).on("zoom", function() {
+          return semantic_zoom();
+        }));
+        svg.append("rect").attr("class", "overlay").attr("width", plot.width).attr("height", plot.height).attr("fill", "none").attr("pointer-events", "all").style("cursor", "move");
+        transform = function(d) {
+          return "translate(" + (plot.scales.x(d.x)) + "," + (plot.scales.y(d.y)) + ")";
+        };
+        circles = svg.selectAll("circle").data(data).enter().append("svg:circle").attr("r", radius).attr("title", function(d) {
+          return "<strong>" + d.name + "</strong><br>x: " + (dec_format(d.x)) + "<br>y: " + (dec_format(d.y));
+        }).attr("class", "circle_tooltip").attr("transform", transform);
+        names = svg.selectAll("text").data(data, function(d) {
+          return d.name;
+        }).enter().append("text").attr("dy", ".32em").attr("dx", "8").attr("text-anchor", "left").text(function(d) {
+          return d.name;
+        }).attr("transform", transform).attr("display", "none");
+        semantic_zoom = function() {
+          circles.attr("transform", transform);
+          return names.attr("transform", transform);
+        };
+        $(".circle_tooltip").tooltip({
+          html: true,
+          container: "body",
+          placement: "top"
+        });
+        show_names_button = plot.append("g").attr("transform", "translate(" + plot.width + "," + 0 + ")").style("cursor", "pointer").style("font-size", "15px").on("click", function() {
+          return change();
+        });
+        d3.select(window).on("keydown", function() {
+          var _ref;
+          if (((_ref = d3.event.keyCode) === 78 || _ref === 32)) {
+            return change();
+          }
+        });
+        show_names_button.append("circle").attr("r", 7).attr("stroke", "black").attr("stroke-width", 2);
+        show_names_button.append("text").attr('text-anchor', 'start').attr('dy', '.32em').attr('dx', '12');
+        change = function() {
+          if (show_names_button.classed("show_names")) {
+            show_names_button.attr("class", "");
+            return update();
+          } else {
+            show_names_button.attr("class", "show_names");
+            return update();
+          }
+        };
+        update = function() {
+          if (show_names_button.classed("show_names")) {
+            names.attr("display", "inline");
+            return show_names_button.select("circle").attr("fill", "black");
+          } else {
+            names.attr("display", "none");
+            show_names_button.select("circle").attr("fill", "white");
+            return show_names_button.select("text").text("Show names");
+          }
+        };
+        return update();
+      });
+    
+    }).call(this);
+
+    </script>
+  </body>
+</html>
